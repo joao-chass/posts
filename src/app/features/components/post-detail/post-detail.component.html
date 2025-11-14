@@ -1,0 +1,198 @@
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="container mx-auto px-4 max-w-4xl">
+      <div class="mb-6">
+        <button 
+          routerLink="/posts"
+          class="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium transition-colors mb-4"
+        >
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+          </svg>
+          Voltar para Posts
+        </button>
+      </div>
+  
+      <app-loading *ngIf="loading()"></app-loading>
+  
+      <div *ngIf="error() && !loading()" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+        <div class="flex items-center">
+          <span class="text-red-600 font-medium">{{ error() }}</span>
+          <button 
+            (click)="loadPost(post()?.id!)"
+            class="ml-auto text-red-600 hover:text-red-800 font-medium"
+            *ngIf="post()"
+          >
+            Refresh
+          </button>
+        </div>
+      </div>
+  
+      <div *ngIf="post() && !loading()" class="bg-white rounded-lg shadow-md overflow-hidden mb-8">
+        <div class="border-b border-gray-200 px-6 py-4">
+          <div class="flex justify-between items-start">
+            <div>
+              <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ post()?.title }}</h1>
+              <div class="flex items-center text-sm text-gray-500">
+                <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium">
+                 ID do Post: {{ post()?.id }}
+                </span>
+                <span class="mx-2">•</span>
+                <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs font-medium">
+                 ID do Usuario: {{ post()?.userId }}
+                </span>
+              </div>
+            </div>
+            <button
+              (click)="onEditPost()"
+              class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+              </svg>
+              Editar 
+            </button>
+          </div>
+        </div>
+  
+        <div class="px-6 py-8">
+          <div class="prose max-w-none">
+            <p class="text-gray-700 leading-relaxed whitespace-pre-line">{{ post()?.body }}</p>
+          </div>
+        </div>
+      </div>
+  
+      <div *ngIf="post() && !loading()" class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="border-b border-gray-200 px-6 py-4">
+          <h2 class="text-xl font-bold text-gray-900">
+            Comentarios
+            <span class="bg-blue-100 text-blue-800 text-sm font-medium px-2 py-1 rounded ml-2">
+              {{ commentsCount() }}
+            </span>
+          </h2>
+        </div>
+  
+        <div class="border-b border-gray-200 px-6 py-6 bg-gray-50">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">Adicionar Comentario</h3>
+          <form (ngSubmit)="onSubmitComment()" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label for="comment-name" class="block text-sm font-medium text-gray-700 mb-1">
+                  Nome *
+                </label>
+                <input
+                  type="text"
+                  id="comment-name"
+                  [(ngModel)]="newComment().name"
+                  name="name"
+                  required
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Seu nome"
+                >
+              </div>
+              <div>
+                <label for="comment-email" class="block text-sm font-medium text-gray-700 mb-1">
+                  E-mail *
+                </label>
+                <input
+                  type="email"
+                  id="comment-email"
+                  [(ngModel)]="newComment().email"
+                  name="email"
+                  required
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="seu.email@exemplo.com"
+                >
+              </div>
+            </div>
+            <div>
+              <label for="comment-body" class="block text-sm font-medium text-gray-700 mb-1">
+                Comentario *
+                <span class="text-sm text-gray-500 ml-2">{{ characterCount() }}/500</span>
+              </label>
+              <textarea
+                id="comment-body"
+                [(ngModel)]="newComment().body"
+                name="body"
+                rows="4"
+                maxlength="500"
+                required
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Escreva seu comentario aqui..."
+              ></textarea>
+            </div>
+            <div class="flex justify-between items-center">
+              <div *ngIf="error()" class="text-red-600 text-sm">
+                {{ error() }}
+              </div>
+              <button
+                type="submit"
+                [disabled]="!newComment().name.trim() || !newComment().email.trim() || !newComment().body.trim()"
+                class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Salvar Comenatario 
+              </button>
+            </div>
+          </form>
+        </div>
+  
+        <div class="divide-y divide-gray-200">
+          <div *ngIf="commentsLoading()" class="px-6 py-8">
+            <div class="flex justify-center">
+              <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            </div>
+          </div>
+  
+     
+          <div 
+            *ngFor="let comment of comments(); trackBy: trackByCommentId"
+            class="px-6 py-6 hover:bg-gray-50 transition-colors"
+          >
+            <div class="flex justify-between items-start mb-3">
+              <div>
+                <h4 class="font-semibold text-gray-900">{{ comment.name }}</h4>
+                <p class="text-sm text-blue-600">{{ comment.email }}</p>
+              </div>
+              <button
+                (click)="openModalDeleteComment(comment.id)"
+                class="text-red-600 hover:text-red-800 transition-colors p-1 rounded"
+                title="Delete comment"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+              </button>
+            </div>
+            <p class="text-gray-700 leading-relaxed whitespace-pre-line">{{ comment.body }}</p>
+          </div>
+  
+
+          <div *ngIf="!commentsLoading() && comments().length == 0" class="px-6 py-12 text-center">
+            <svg class="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+            </svg>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">Sem comentariost</h3>
+          </div>
+        </div>
+      </div>
+  
+    
+      <app-post-edit-modal
+        [post]="post()"
+        [isOpen]="showEditModal()"
+        (save)="onSaveEdit($event)"
+        (cancel)="onCancelEdit()"
+      ></app-post-edit-modal>
+
+
+
+    <app-modal
+    [isOpen]="showDeleteModal()"
+    title="Deletar Post"
+    [message]="deleteComment()"
+    confirmText="Deletar"
+    cancelText="Cancelar"
+    (confirm)="confirmDeleteComment()"
+    (cancel)="cancelDelete()"
+  ></app-modal>
+    </div>
+  </div>
