@@ -1,4 +1,4 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { Post } from '../../../models/post.model';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { PostService } from '../../../core/services/post/post.service';
@@ -9,6 +9,7 @@ import { LoadingComponent } from '../../../shared/loading/loading.component';
 import { PostEditModalComponent } from '../post-edit-modal/post-edit-modal.component';
 import { FormsModule } from '@angular/forms';
 import { ModalComponent } from '../../../shared/modal/modal.component';
+import { ToastService } from '../../../shared/toast/services/toast.service';
 
 @Component({
   selector: 'app-post-detail',
@@ -27,6 +28,8 @@ export class PostDetailComponent {
   loading = signal(true);
   commentsLoading = signal(true);
   error = signal<string | null>(null);
+
+  private toastService = inject(ToastService);
 
 
   newComment = signal({
@@ -60,6 +63,7 @@ export class PostDetailComponent {
       this.loadComments(postId);
     } else {
       this.error.set('Post ID nao encontrado');
+
       this.loading.set(false);
     }
   }
@@ -75,6 +79,7 @@ export class PostDetailComponent {
       },
       error: (err) => {
         this.error.set('Falha ao carregar o post');
+        this.toastService.error("Falha ao carregar o post")
         this.loading.set(false);
       }
     });
@@ -91,6 +96,7 @@ export class PostDetailComponent {
       error: (err) => {
         this.comments.set(this.commentService.getCachedCommentsByPostId(postId));
         this.commentsLoading.set(false);
+        this.toastService.error("Erro ao carregar")
       }
     });
   }
@@ -115,9 +121,12 @@ export class PostDetailComponent {
       next: () => {
         this.newComment.set({ name: '', email: '', body: '' });
         this.error.set(null);
+        this.toastService.success("Comentario criado com sucesso!")
       },
       error: (err) => {
         this.error.set('Falha ao adicionar comentario');
+        this.toastService.error("Falha ao carregar o post'")
+
       }
     });
   }
@@ -135,9 +144,11 @@ export class PostDetailComponent {
         this.post.set(updatedPost);
         this.showEditModal.set(false);
         this.error.set(null);
+        this.toastService.success("Atulizacao feita com sucesso!");
       },
       error: (err) => {
         this.error.set('Falha ao atulizar');
+        this.toastService.error("Falha ao atulizar")
       }
     });
   }
@@ -151,9 +162,11 @@ export class PostDetailComponent {
       this.commentService.deleteComment(this.commentId()).subscribe({
         next: (res) => {
           this.showDeleteModal.set(false);
+          this.toastService.success("Comentario deletado com sucesso")
         },
         error: (err) => {
           this.error.set('Failed to delete comment');
+          this.toastService.error("Falha ao deletar comentario")
         }
       });
     

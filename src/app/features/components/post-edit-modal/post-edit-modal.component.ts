@@ -1,7 +1,8 @@
-import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
+import { Component, EventEmitter, inject, Input, Output, signal } from '@angular/core';
 import { Post, UpdatePostDTO } from '../../../models/post.model';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ToastService } from '../../../shared/toast/services/toast.service';
 
 @Component({
   selector: 'app-post-edit-modal',
@@ -14,6 +15,8 @@ export class PostEditModalComponent {
   @Input() isOpen = false;
   @Output() save = new EventEmitter<UpdatePostDTO>();
   @Output() cancel = new EventEmitter<void>();
+
+  private toastService = inject(ToastService);
 
   loading = signal(false);
   error = signal<string | null>(null);
@@ -41,6 +44,7 @@ export class PostEditModalComponent {
   onSave(): void {
     if (!this.formData.title.trim() || !this.formData.body.trim()) {
       this.error.set('Titulo e comentario e obrigatorio');
+      this.toastService.warning('Titulo e comentario e obrigatorio!');
       return;
     }
 
@@ -51,8 +55,9 @@ export class PostEditModalComponent {
       title: this.formData.title.trim(),
       body: this.formData.body.trim()
     };
-
+  
     this.save.emit(updateData);
+   
   }
 
   onCancel(): void {

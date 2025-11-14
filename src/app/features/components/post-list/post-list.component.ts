@@ -1,4 +1,4 @@
-import { Component, computed, effect, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { Post, UpdatePostDTO } from '../../../models/post.model';
 import { PostService } from '../../../core/services/post/post.service';
 import { LoadingComponent } from '../../../shared/loading/loading.component';
@@ -6,6 +6,7 @@ import { ModalComponent } from '../../../shared/modal/modal.component';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { PostEditModalComponent } from '../post-edit-modal/post-edit-modal.component';
+import { ToastService } from '../../../shared/toast/services/toast.service';
 
 @Component({
   selector: 'app-post-list',
@@ -30,6 +31,8 @@ export class PostListComponent {
 
   postToEdit = signal<Post | null>(null);
   showEditModal = signal(false);
+
+  private toastService = inject(ToastService);
 
   filteredPosts = computed(() => {
     const term = this.searchTerm().toLowerCase();
@@ -79,6 +82,7 @@ export class PostListComponent {
       this.loading.set(false);
     }, error => {
       this.error.set('Failed to load posts');
+      this.toastService.error('Algo deu errado!');
       this.loading.set(false);
     })
 
@@ -131,8 +135,12 @@ export class PostListComponent {
     const post = this.postToDelete();
     if (post) {
       this.postService.deletePost(post.id).subscribe({
+        next: () => {
+          this.toastService.success('Post deletado com sucesso!');
+        },
         error: (err) => {
           this.error.set('Failed to delete post');
+          this.toastService.error('Falha ao deletar!');
         }
       });
     }
@@ -168,8 +176,10 @@ export class PostListComponent {
           this.showEditModal.set(false);
           this.postToEdit.set(null);
           this.error.set(null);
+          this.toastService.success('Post editado com sucesso!');
         },
         error: (err) => {
+          this.toastService.error('Algo deu errado!');
           this.error.set('Failed to update post');
         }
       });

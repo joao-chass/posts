@@ -1,0 +1,4 @@
+<app-toast 
+      [toasts]="toastService.getToasts()" 
+      (remove)="toastService.remove($event)"
+    ></app-toast>
